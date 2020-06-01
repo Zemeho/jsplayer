@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="user-scalable=no">
+  <title>Valinta Music Player</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+ <!-- Scripts -->
+        <script src="valinta.min.js"></script>
+<body id="main">
+
+  <!-- Top Info -->
+  <div id="title">
+    <span id="track"></span>
+    <div id="timer">0:00</div>
+    <div id="genreTitle">Genre</div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controlsOuter">
+    <div class="controlsInner">
+      <div id="loading"></div>
+      <div class="btn" id="playBtn">
+        
+      </div>
+      <div class="btn" id="pauseBtn"></div>
+      <div class="btn" id="nextBtn">
+      </div>
+
+    </div>
+    <div class="btn" id="playlistBtn"></div>
+
+  </div>
+
+  <!-- Progress -->
+  <div id="waveform"></div>
+  <div id="bar"></div>
+  <div id="progress"></div>
+
+  <!-- Playlist -->
+  <div id="playlist">
+    <div id="list"></div>
+  </div>
+
+  <!-- Volume -->
+  <div id="volume" class="fadeout">
+    <div id="barFull" class="bar"></div>
+    <div id="barEmpty" class="bar"></div>
+    <div id="sliderBtn"></div>
+  </div>
+<div id="adImage" >
+  <img id= "imageImp" style="display:none; " src="" />
+</div>
+
+ <script type="text/javascript">
+          var player = new Valinta();
+
+          var useGDPRS = true;
+          console.log("Valinta player version:" + player.version())
+          
+          player.init("rQPTSSWk3y9WPX998u5Kpg",useGDPRS);
+  
+
+          player.setCallback("playbackStatus",function(genre, song, currentTime, duration){
+        
+            if (song.title)
+              track.innerHTML = song.title;
+            else
+              track.innerHTML = song;
+
+            timer.innerHTML = player.formatTime(Math.round(currentTime))+"/"+player.formatTime(Math.round(duration));
+            duration.innerHTML = player.formatTime(Math.round(duration));
+            progress.style.width = (((currentTime / duration) * 100) || 0) + '%';
+            
+            genreTitle.innerHTML = genre.title;
+
+          });
+          player.setCallback("adImageAvailable",function(imageImpression, width, height){
+            
+            var mainHeight = document.body.clientHeight;
+            var mainWidth = document.body.clientWidth;
+         
+
+            var scale = height / mainHeight/2;
+       
+            var left =mainWidth / 2 - width/2;
+            adImage.style.width = width*scale+'px';
+            adImage.style.left = (left / mainWidth*100)+"%";
+            adImage.style.height = mainHeight*.33+'px';
+            adImage.style.top = ((mainHeight*.33-height/2) / mainHeight*100)+"%";
+           
+            
+            imageImp.style.width = width*scale;
+            imageImp.style.height = "100%";
+
+            imageImp.style.display = "block";
+            imageImp.src = imageImpression.uri;
+            adImage.style.display = "block";
+
+          });
+          player.setCallback("genreListReceived",function(genres){
+            
+            // Display the title of the first track.
+          console.log(genres)
+
+            // Setup the playlist display.
+            genres.forEach(function(genre) {
+              var div = document.createElement('div');
+              div.className = 'list-song';
+              div.innerHTML = genre.title;
+              div.onclick = function() {
+                console.log("Genre selected:" + genre.id)
+                player.selectGenre(genre.id)
+                player.playNextSong();
+                pauseBtn.style.display = "block";
+                playBtn.style.display = "none";
+                togglePlaylist();
+              };
+              list.appendChild(div);
+            });
+
+          });
+          function togglePlaylist(){
+            var display = (playlist.style.display === 'block') ? 'none' : 'block';
+
+            setTimeout(function() {
+              playlist.style.display = display;
+            }, (display === 'block') ? 0 : 500);
+            playlist.className = (display === 'block') ? 'fadein' : 'fadeout';
+
+          }
+          playlistBtn.addEventListener('click',function(){
+            togglePlaylist();
+          })
+          adImage.addEventListener('click', function() {
+            player.imageAdClicked();
+            adImage.style.display = "none";
+            
+          });
+
+          playBtn.addEventListener('click', function() {
+            player.playNextSong();
+            pauseBtn.style.display = "block";
+            playBtn.style.display = "none";
+          });
+          nextBtn.addEventListener('click', function() {
+            player.playNextSong();
+            pauseBtn.style.display = "block";
+            playBtn.style.display = "none";
+          });
+          pauseBtn.addEventListener('click', function() {
+            player.pausePlayback();
+              
+            pauseBtn.style.display = "none";
+            playBtn.style.display = "block";
+          });
+        </script>
+</body>
+</html>
+ 

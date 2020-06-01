@@ -1,0 +1,99 @@
+Valinta Player Usage in HTML games and apps:
+
+1. Include script in your html head:
+  <script src="valinta.min.js"></script>
+
+2. with following javascript functions you are able to get player functional:
+
+          var player = new Valinta();
+
+          // If you use GDPRS (ask from end user if allowed)
+          var useGDPRS = true;
+
+          // print valinta player version
+          console.log("Valinta player version:" + player.version())
+
+          // Init your player with your own application ID (received from Zemeho team. Contact info@zemeho.com)
+          player.init("your-application-id",useGDPRS, ad_image_max_width, ad_image_max_height);
+
+          Where optional parameters ad_image_max_width default is 300 and ad_image_max_height default is 250
+
+
+          Following callback functions needs to be defined:
+          // playbackStatus - tells which music or ad is played
+          
+          // adImageAvailable - informs if there is a image in addition to voice ad. This will increase revenue if shown and clicked by user.
+
+          // genreListReceived - give genres list after init function
+
+
+          Examples of settings up callback functions:
+          player.setCallback("playbackStatus",function(genre, song, currentTime, duration){
+        
+            if (song.title)
+              track.innerHTML = song.title;
+            else
+              track.innerHTML = song;
+
+            timer.innerHTML = player.formatTime(Math.round(currentTime))+"/"+player.formatTime(Math.round(duration));
+            duration.innerHTML = player.formatTime(Math.round(duration));
+            progress.style.width = (((currentTime / duration) * 100) || 0) + '%';
+            
+            genreTitle.innerHTML = genre.title;
+
+          });
+
+          player.setCallback("adImageAvailable",function(imageImpression, width, height){
+            
+            var mainHeight = document.body.clientHeight;
+            var mainWidth = document.body.clientWidth;
+         
+
+            var scale = height / mainHeight/2;
+       
+            var left =mainWidth / 2 - width/2;
+            adImage.style.width = width*scale+'px';
+            adImage.style.left = (left / mainWidth*100)+"%";
+            adImage.style.height = mainHeight*.33+'px';
+            adImage.style.top = ((mainHeight*.33-height/2) / mainHeight*100)+"%";
+            console.log(":"+adImage.style.height)
+            
+            imageImp.style.width = width*scale;
+            imageImp.style.height = "100%";
+
+            imageImp.style.display = "block";
+            imageImp.src = imageImpression.uri;
+            adImage.style.display = "block";
+
+          });
+          
+          player.setCallback("genreListReceived",function(genres){
+            
+            // Display the title of the first track.
+
+            genreTitle.innerHTML = genres[0].title;
+
+            // Setup the playlist display.
+            genres.forEach(function(genre) {
+              var div = document.createElement('div');
+              div.className = 'list-song';
+              div.innerHTML = genre.title;
+              div.onclick = function() {
+                console.log("Genre selected:" + genre.id)
+                player.selectGenre(genre.id)
+                player.playNextSong();
+                pauseBtn.style.display = "block";
+                playBtn.style.display = "none";
+                togglePlaylist();
+              };
+              list.appendChild(div);
+            });
+
+          });
+
+ 3. Furthermore you can have following functions available:
+  select_genre(genre_id) - for changing genre
+  playNextSong()  - plays next song from the genre. If there are ads available will play ad instead
+  stopPlayback()
+  pausePlayback()
+  imageAdClicked()  - if user clicks the image, this should be called in order to gain impresssions from the clicks.
